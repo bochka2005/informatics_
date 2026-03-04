@@ -16,7 +16,7 @@ void drawGraph(sf::RenderWindow& window, std::function<float(float)> func, float
 }
 
 int main() {
-    sf::RenderWindow window(sf::VideoMode(800, 600), "Graph Regions App");
+    sf::RenderWindow window(sf::VideoMode(800, 600), "app for graf");
 
     sf::CircleShape userPoint(5);
     userPoint.setFillColor(sf::Color::Red);
@@ -126,3 +126,4 @@ int main() {
     }
     return 0;
 }
+
