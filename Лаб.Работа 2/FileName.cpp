@@ -1,8 +1,9 @@
-﻿#include <SFML/Graphics.hpp>
+#include <SFML/Graphics.hpp>
 #include <functional> 
 #include <cmath> 
 #include <string>
 
+// Функция графиков
 void drawGraph(sf::RenderWindow& window, std::function<float(float)> func, float xMin, float xMax, float scaleX, float scaleY, sf::Color color) {
     sf::VertexArray graph(sf::LinesStrip);
     for (float x = xMin; x <= xMax; x += 0.1f) {
@@ -15,7 +16,7 @@ void drawGraph(sf::RenderWindow& window, std::function<float(float)> func, float
 }
 
 int main() {
-    sf::RenderWindow window(sf::VideoMode(800, 600), "app for graf");
+    sf::RenderWindow window(sf::VideoMode(800, 600), "Graph Regions App");
 
     sf::CircleShape userPoint(5);
     userPoint.setFillColor(sf::Color::Red);
@@ -26,19 +27,22 @@ int main() {
         font.loadFromFile("C:/Windows/Fonts/arial.ttf");
     }
 
-    sf::Text coordinatesText;
-    coordinatesText.setFont(font);
-    coordinatesText.setCharacterSize(20);
-    coordinatesText.setFillColor(sf::Color::Black);
-    coordinatesText.setPosition(10, 10);
+    sf::Text infoText;
+    infoText.setFont(font);
+    infoText.setCharacterSize(18);
+    infoText.setFillColor(sf::Color::Black);
+    infoText.setPosition(10, 10);
 
+    // Оси коорд
     sf::VertexArray xAxis(sf::Lines, 2);
-    xAxis[0].position = sf::Vector2f(0, 300); xAxis[0].color = sf::Color::Black;
-    xAxis[1].position = sf::Vector2f(800, 300); xAxis[1].color = sf::Color::Black;
+    xAxis[0].position = sf::Vector2f(0, 300); xAxis[0].color = sf::Color(200, 200, 200);
+    xAxis[1].position = sf::Vector2f(800, 300); xAxis[1].color = sf::Color(200, 200, 200);
 
     sf::VertexArray yAxis(sf::Lines, 2);
-    yAxis[0].position = sf::Vector2f(400, 0); yAxis[0].color = sf::Color::Black;
-    yAxis[1].position = sf::Vector2f(400, 600); yAxis[1].color = sf::Color::Black;
+    yAxis[0].position = sf::Vector2f(400, 0); yAxis[0].color = sf::Color(200, 200, 200);
+    yAxis[1].position = sf::Vector2f(400, 600); yAxis[1].color = sf::Color(200, 200, 200);
+
+    const float scale = 30.0f; // Пикселей\ 1 единицу
 
     while (window.isOpen()) {
         sf::Event event;
@@ -48,50 +52,77 @@ int main() {
 
             if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
                 sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-                float mathX = (mousePos.x - 400) / 30.0f;
-                float mathY = -(mousePos.y - 300) / 30.0f;
+
+                // координаты в математику
+                float mathX = (mousePos.x - 400) / scale;
+                float mathY = -(mousePos.y - 300) / scale;
 
                 userPoint.setPosition(mousePos.x - userPoint.getRadius(), mousePos.y - userPoint.getRadius());
                 userPointExists = true;
 
-                float yLower = mathX - 3.0f;
-                float yUpper = mathX + 5.0f;
+                float line1 = mathX - 3.0f;    // y = x - 3
+                float line2 = -mathX + 5.0f;   // y = -x + 5
+
                 std::string region;
-                const float EPS = 0.15f;
+                const float EPS = 0.2f;
 
-                if (std::abs(mathY - yLower) < EPS) region = "Granitsa: y = x - 3";
-                else if (std::abs(mathY - yUpper) < EPS) region = "Granitsa: y = x + 5";
-                else if (mathY > yUpper) region = "Oblast 1 vishe";
-                else if (mathY < yLower) region = "Oblast 3 nije";
-                else region = "Oblast 2 mejdu";
+                // Логика 4 областей
+                if (std::abs(mathY - line1) < EPS) {
+                    region = "Na linii: y = x - 3";
+                }
+                else if (std::abs(mathY - line2) < EPS) {
+                    region = "Na linii: y = -x + 5";
+                }
+                else {
+                    if (mathY > line1 && mathY > line2) {
+                        region = "Oblast 1 Verh";
+                    }
+                    else if (mathY < line1 && mathY < line2) {
+                        region = "Oblast 2 Niz";
+                    }
+                    else if (mathX > 4.0f && mathY < line2 && mathY > line1) {
+                        // точка пересечения 
+                        region = "Oblast 3 Pravo";
+                    }
+                    else if (mathY > line1 && mathY < line2) {
+                        region = "Oblast 4 Levo";
+                    }
+                    else {
+                        // проверка для правой части, для уточнения
+                        region = "Oblast 3 Pravo";
+                    }
+                }
 
-                coordinatesText.setString("X: " + std::to_string(mathX).substr(0, 5) +
-                    ", Y: " + std::to_string(mathY).substr(0, 5) + "\n" + region);
+                infoText.setString("X: " + std::to_string(mathX).substr(0, 5) +
+                    "  Y: " + std::to_string(mathY).substr(0, 5) +
+                    "\nResult: " + region);
             }
         }
 
         window.clear(sf::Color::White);
+
+        // Сетку и оси
         window.draw(xAxis);
         window.draw(yAxis);
-
         for (int i = -12; i <= 12; ++i) {
             if (i == 0) continue;
-            sf::Text n; n.setFont(font); n.setCharacterSize(12); n.setFillColor(sf::Color(150, 150, 150));
+            sf::Text n; n.setFont(font); n.setCharacterSize(10); n.setFillColor(sf::Color(180, 180, 180));
             n.setString(std::to_string(i));
-            n.setPosition(400 + i * 30 - 7, 305); window.draw(n);
-            n.setPosition(405, 300 - i * 30 - 8); window.draw(n);
+            n.setPosition(400 + i * scale - 5, 305); window.draw(n);
+            n.setPosition(405, 300 - i * scale - 7); window.draw(n);
         }
 
+        // Рисунок функций
         float xMin = -15.0f, xMax = 15.0f;
-        drawGraph(window, [](float x) { return x - 3.0f; }, xMin, xMax, 30, 30, sf::Color::Blue);
-        drawGraph(window, [](float x) { return -x + 5.0f; }, xMin, xMax, 30, 30, sf::Color::Red);
+        drawGraph(window, [](float x) { return x - 3.0f; }, xMin, xMax, scale, scale, sf::Color::Blue);
+        drawGraph(window, [](float x) { return -x + 5.0f; }, xMin, xMax, scale, scale, sf::Color::Red);
 
         if (userPointExists) {
             window.draw(userPoint);
-            window.draw(coordinatesText);
+            window.draw(infoText);
         }
+
         window.display();
     }
     return 0;
-
 }
