@@ -84,7 +84,7 @@ int main() {
 
         float xMin = -15.0f, xMax = 15.0f;
         drawGraph(window, [](float x) { return x - 3.0f; }, xMin, xMax, 30, 30, sf::Color::Blue);
-        drawGraph(window, [](float x) { return x + 5.0f; }, xMin, xMax, 30, 30, sf::Color::Red);
+        drawGraph(window, [](float x) { return -x + 5.0f; }, xMin, xMax, 30, 30, sf::Color::Red);
 
         if (userPointExists) {
             window.draw(userPoint);
@@ -93,4 +93,5 @@ int main() {
         window.display();
     }
     return 0;
+
 }
