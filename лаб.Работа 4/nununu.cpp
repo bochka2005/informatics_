@@ -45,6 +45,7 @@ int main() {
     cout << "Znachenie T: " << T << endl;
     cout << "Rezultiruyushchij massiv B: ";
     print(B, countB);
-
+    system("pause");
     return 0;
+
 }
