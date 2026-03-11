@@ -58,6 +58,7 @@ int main() {
     cout << "\nResult (intersection + start from 1): ";
     for (int elem : result) cout << elem << " ";
     cout << endl;
-
+    system("pause");
     return 0;
+
 }
